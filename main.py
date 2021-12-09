@@ -1,16 +1,7 @@
 from hashlib import sha256
-from threading import Thread
-import threading
 import numpy as np
 import time
 import multiprocessing
-
-def timer():
-    start_time = time.time()
-    while(True):
-        if multiprocessing.active_count() == 2:
-            break
-    print("--- %s seconds ---" % (time.time() - start_time))
 
 def slice_float(count: int):
     num = 26
@@ -37,14 +28,19 @@ if __name__ == '__main__':
         '3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b',  # apple
         '74e1bb62f8dabb8125a58852b63bdf6eaef667cb56ac7f7cdba6d7305c50a22f',  # mmmmm
     ]
+    th = []
     count_threads = int(input("количество потоков = "))
-    # if count_threads == 1:
-    #     thr_broot(dec, 97, 122)
-    # else:
     slices = slice_float(count_threads)
-
     for i in range(count_threads):
-        th = multiprocessing.Process(target=thr_broot, args=(dec, slices[i] + 97, slices[i+1] + 97, i))
-        th.start()
-    # thh = multiprocessing.Process(target=timer)
-    # thh.start()
+        th.append(multiprocessing.Process(target=thr_broot, args=(dec, slices[i] + 97, slices[i+1] + 97, i)))
+        th[i].start()
+    start_time = time.time()
+    while True:
+        flag = False
+        for i in th:
+            if i.is_alive():
+                flag = True
+                break
+        if not flag:
+            break
+    print("--- %s seconds ---" % (time.time() - start_time))
